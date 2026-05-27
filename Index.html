@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Q3 Campaign Calendar — Lead Generation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0e0d0b;
+    --paper: #f5f2ec;
+    --paper2: #ede9e0;
+    --rule: #d6d0c4;
+    --accent: #c94f2c;
+    --accent2: #2c6bc9;
+    --accent3: #2a9668;
+    --muted: #7a7568;
+    --social: #4a3bbf;
+    --social-bg: #eeedfc;
+    --content: #1a7a54;
+    --content-bg: #e0f5ec;
+    --paid: #c47a10;
+    --paid-bg: #fdf0d9;
+    --col-w: 240px;
+  }
+
+  html { font-size: 15px; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Instrument Sans', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    body { background: #fff; }
+    .no-print { display: none !important; }
+    .page-shell { padding: 20mm 18mm; }
+    .grid-track { page-break-inside: avoid; }
+  }
+
+  /* ── SHELL ── */
+  .page-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 52px 40px 80px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 1.5px solid var(--ink);
+    padding-bottom: 20px;
+    margin-bottom: 48px;
+    gap: 24px;
+  }
+
+  .header-left {}
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: .1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(30px, 4vw, 48px);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -.01em;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+  .meta-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+  .meta-pill .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .08em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .meta-pill .value {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  /* ── TOOLBAR ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .toolbar-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-right: 4px;
+  }
+  .filter-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 5px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--rule);
+    background: transparent;
+    cursor: pointer;
+    letter-spacing: .04em;
+    transition: all .15s;
+    color: var(--ink);
+  }
+  .filter-btn:hover { background: var(--paper2); }
+  .filter-btn.active { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+  .filter-btn.active.social { border-color: var(--social); background: var(--social); }
+  .filter-btn.active.content { border-color: var(--content); background: var(--content); }
+  .filter-btn.active.paid { border-color: var(--paid); background: var(--paid); color: var(--paper); }
+  .spacer { flex: 1; }
+  .print-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 5px 14px;
+    border: 1px solid var(--rule);
+    border-radius: 100px;
+    background: transparent;
+    cursor: pointer;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all .15s;
+  }
+  .print-btn:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* ── LEGEND ROW ── */
+  .legend-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .legend-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── MONTH GRID ── */
+  .month-strip {
+    display: grid;
+    grid-template-columns: 130px repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .month-head {
+    padding: 10px 16px;
+    border-radius: 6px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .month-head .phase {
+    display: block;
+    font-size: 16px;
+    font-family: 'DM Serif Display', serif;
+    letter-spacing: 0;
+    text-transform: none;
+    margin-top: 4px;
+    color: var(--paper);
+  }
+  .month-head.july { background: #1a1814; }
+  .month-head.aug  { background: #1c2030; }
+  .month-head.sep  { background: #1e1a12; }
+
+  /* ── CHANNEL TRACKS ── */
+  .channel-section { margin-bottom: 6px; }
+
+  .grid-track {
+    display: grid;
+    grid-template-columns: 130px repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 10px;
+    transition: opacity .2s;
+  }
+  .grid-track.hidden { opacity: .08; pointer-events: none; }
+
+  .channel-tag {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 14px;
+    gap: 6px;
+  }
+  .ch-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .ch-cadence {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .ch-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    margin-bottom: 4px;
+    flex-shrink: 0;
+  }
+
+  .activity-card {
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow .15s, transform .12s;
+  }
+  .activity-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,.07);
+    transform: translateY(-1px);
+  }
+  .activity-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+  }
+  .activity-card.social::before  { background: var(--social); }
+  .activity-card.content::before { background: var(--content); }
+  .activity-card.paid::before    { background: var(--paid); }
+
+  .card-tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 100px;
+    margin-bottom: 8px;
+  }
+  .card-tag.social  { background: var(--social-bg);  color: var(--social); }
+  .card-tag.content { background: var(--content-bg); color: var(--content); }
+  .card-tag.paid    { background: var(--paid-bg);    color: var(--paid); }
+
+  .card-body {
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: #3a3730;
+  }
+  .card-body ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .card-body ul li {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+  }
+  .card-body ul li::before {
+    content: '—';
+    color: var(--rule);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── DIVIDER ── */
+  .section-rule {
+    border: none;
+    border-top: 1px dashed var(--rule);
+    margin: 24px 0;
+  }
+
+  /* ── MILESTONES ── */
+  .milestones-grid {
+    display: grid;
+    grid-template-columns: 130px repeat(3, 1fr);
+    gap: 10px;
+  }
+  .milestones-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 4px;
+  }
+  .milestones-label .ch-label { color: var(--muted); }
+
+  .milestone-col {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .milestone-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid var(--rule);
+    border-radius: 7px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #3a3730;
+    cursor: default;
+    transition: box-shadow .15s;
+  }
+  .milestone-item:hover { box-shadow: 0 3px 12px rgba(0,0,0,.06); }
+  .milestone-week {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 2px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .wk-jul { background: #f0ede5; color: #5a5040; }
+  .wk-aug { background: #e6eaf5; color: #2c3a5c; }
+  .wk-sep { background: #f5ede6; color: #5c3a20; }
+
+  /* ── KPI BAR ── */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 32px;
+  }
+  .kpi-card {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 8px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .kpi-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .kpi-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--paper);
+  }
+  .kpi-value em { font-style: italic; color: #c9a97a; }
+  .kpi-note {
+    font-size: 11px;
+    color: #7a7568;
+    line-height: 1.4;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 52px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: .06em;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate { animation: fadeUp .4s ease both; }
+
+  /* responsive */
+  @media (max-width: 780px) {
+    .page-shell { padding: 32px 20px 60px; }
+    .month-strip,
+    .grid-track,
+    .milestones-grid { grid-template-columns: 1fr; }
+    .channel-tag, .milestones-label { display: none; }
+    header { flex-direction: column; align-items: flex-start; }
+    .header-meta { align-items: flex-start; }
+    .kpi-strip { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-shell">
+
+  <!-- HEADER -->
+  <header class="animate" style="animation-delay:.05s">
+    <div class="header-left">
+      <p class="eyebrow">Agency · Lead Generation · Campaign Plan</p>
+      <h1>Q3 Campaign<br><em>Calendar</em></h1>
+    </div>
+    <div class="header-meta">
+      <div class="meta-pill">
+        <span class="label">Quarter</span>
+        <span class="value">Jul – Sep 2026</span>
+      </div>
+      <div class="meta-pill">
+        <span class="label">Channels</span>
+        <span class="value">Social · Content · Paid</span>
+      </div>
+      <div class="meta-pill">
+        <span class="label">Goal</span>
+        <span class="value">Lead Generation</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar no-print animate" style="animation-delay:.1s">
+    <span class="toolbar-label">Filter</span>
+    <button class="filter-btn active" onclick="filterChannel('all', this)">All channels</button>
+    <button class="filter-btn social" onclick="filterChannel('social', this)">Social media</button>
+    <button class="filter-btn content" onclick="filterChannel('content', this)">Content / SEO</button>
+    <button class="filter-btn paid" onclick="filterChannel('paid', this)">Paid ads</button>
+    <div class="spacer"></div>
+    <button class="print-btn" onclick="window.print()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Print / Export PDF
+    </button>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend-row animate" style="animation-delay:.13s">
+    <div class="legend-item"><span class="legend-dot" style="background:var(--social)"></span>Social media</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--content)"></span>Content / SEO</div>
+    <div class="legend-item"><span class="legend-dot" style="background:var(--paid)"></span>Paid ads</div>
+    <div class="legend-item" style="margin-left:auto">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      &nbsp;Cadence ramps each month — earlier months build audience for later conversion.
+    </div>
+  </div>
+
+  <!-- MONTH HEADERS -->
+  <div class="month-strip animate" style="animation-delay:.16s">
+    <div></div>
+    <div class="month-head july">
+      <span>July</span>
+      <span class="phase">Ignite</span>
+    </div>
+    <div class="month-head aug">
+      <span>August</span>
+      <span class="phase">Accelerate</span>
+    </div>
+    <div class="month-head sep">
+      <span>September</span>
+      <span class="phase">Convert</span>
+    </div>
+  </div>
+
+  <!-- SOCIAL MEDIA ROW -->
+  <div class="grid-track animate" data-channel="social" style="animation-delay:.2s">
+    <div class="channel-tag">
+      <div class="ch-icon" style="background:var(--social-bg)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--social)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+      </div>
+      <span class="ch-label" style="color:var(--social)">Social</span>
+      <span class="ch-cadence">3→4→5×/wk</span>
+    </div>
+    <div class="activity-card social">
+      <span class="card-tag social">Social · 3×/week</span>
+      <div class="card-body"><ul>
+        <li>LinkedIn posts: agency POV, client wins teaser, team culture</li>
+        <li>Launch #AskTheAgency thread series</li>
+        <li>Set up content scheduling + analytics baseline</li>
+      </ul></div>
+    </div>
+    <div class="activity-card social">
+      <span class="card-tag social">Social · 4×/week</span>
+      <div class="card-body"><ul>
+        <li>Introduce case study carousel format</li>
+        <li>1 LinkedIn poll/week on prospect pain points</li>
+        <li>Begin strategic prospect engagement outreach</li>
+      </ul></div>
+    </div>
+    <div class="activity-card social">
+      <span class="card-tag social">Social · 5×/week</span>
+      <div class="card-body"><ul>
+        <li>Daily cadence with CTA-led posts</li>
+        <li>Push testimonial clips and video snippets</li>
+        <li>Drive traffic directly to consultation booking page</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- CONTENT / SEO ROW -->
+  <div class="grid-track animate" data-channel="content" style="animation-delay:.24s">
+    <div class="channel-tag">
+      <div class="ch-icon" style="background:var(--content-bg)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--content)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <span class="ch-label" style="color:var(--content)">Content</span>
+      <span class="ch-cadence">2 posts/mo + assets</span>
+    </div>
+    <div class="activity-card content">
+      <span class="card-tag content">Content · Foundation</span>
+      <div class="card-body"><ul>
+        <li>2 pillar blog posts targeting high-intent keywords</li>
+        <li>Launch gated lead magnet: "Agency Selection Checklist"</li>
+        <li>Set up lead capture + email nurture automation</li>
+      </ul></div>
+    </div>
+    <div class="activity-card content">
+      <span class="card-tag content">Content · Build</span>
+      <div class="card-body"><ul>
+        <li>2 cluster posts linking to July pillars (SEO silo)</li>
+        <li>Publish 1 in-depth client case study</li>
+        <li>Guest post on 1 industry publication for backlinks</li>
+      </ul></div>
+    </div>
+    <div class="activity-card content">
+      <span class="card-tag content">Content · Convert</span>
+      <div class="card-body"><ul>
+        <li>2 bottom-funnel posts: vs competitor, pricing guide</li>
+        <li>Refresh top pillar post with new data and CTAs</li>
+        <li>Submit 2 guest articles for Q4 link pipeline</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <!-- PAID ADS ROW -->
+  <div class="grid-track animate" data-channel="paid" style="animation-delay:.28s">
+    <div class="channel-tag">
+      <div class="ch-icon" style="background:var(--paid-bg)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--paid)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <span class="ch-label" style="color:var(--paid)">Paid Ads</span>
+      <span class="ch-cadence">Always-on + retarget</span>
+    </div>
+    <div class="activity-card paid">
+      <span class="card-tag paid">Paid · Launch</span>
+      <div class="card-body"><ul>
+        <li>LinkedIn Lead Gen Form campaign (ICP targeting)</li>
+        <li>Test 3 ad creatives — copy, visual, CTA variants</li>
+        <li>Set conversion tracking + CRM integration</li>
+      </ul></div>
+    </div>
+    <div class="activity-card paid">
+      <span class="card-tag paid">Paid · Optimise</span>
+      <div class="card-body"><ul>
+        <li>Pause underperformers, scale winning creative</li>
+        <li>Add retargeting: blog visitors + lead magnet downloaders</li>
+        <li>Expand to lookalike audiences off form completers</li>
+      </ul></div>
+    </div>
+    <div class="activity-card paid">
+      <span class="card-tag paid">Paid · Close</span>
+      <div class="card-body"><ul>
+        <li>Full-funnel retargeting active across all segments</li>
+        <li>Run consultation-booking ad with social proof headline</li>
+        <li>Shift budget toward highest-converting CPL campaigns</li>
+      </ul></div>
+    </div>
+  </div>
+
+  <hr class="section-rule animate" style="animation-delay:.3s">
+
+  <!-- MILESTONES -->
+  <div class="milestones-grid animate" style="animation-delay:.32s">
+    <div class="milestones-label">
+      <div class="ch-icon" style="background:var(--paper2); width:28px; height:28px">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <span class="ch-label" style="margin-top:4px">Key Milestones</span>
+    </div>
+    <div class="milestone-col">
+      <div class="milestone-item">
+        <span class="milestone-week wk-jul">Wk 1</span>
+        All campaign assets live — creatives, landing page, tracking
+      </div>
+      <div class="milestone-item">
+        <span class="milestone-week wk-jul">Wk 2</span>
+        Lead magnet published + email nurture sequence live
+      </div>
+      <div class="milestone-item">
+        <span class="milestone-week wk-jul">Wk 4</span>
+        First 30-day paid review — pause/scale decision
+      </div>
+    </div>
+    <div class="milestone-col">
+      <div class="milestone-item">
+        <span class="milestone-week wk-aug">Wk 6</span>
+        First case study published and promoted across channels
+      </div>
+      <div class="milestone-item">
+        <span class="milestone-week wk-aug">Wk 7</span>
+        Retargeting audiences reach 300+ for paid activation
+      </div>
+      <div class="milestone-item">
+        <span class="milestone-week wk-aug">Wk 8</span>
+        Mid-quarter lead volume review vs target
+      </div>
+    </div>
+    <div class="milestone-col">
+      <div class="milestone-item">
+        <span class="milestone-week wk-sep">Wk 10</span>
+        Consultation booking campaign live with full retargeting
+      </div>
+      <div class="milestone-item">
+        <span class="milestone-week wk-sep">Wk 12</span>
+        Q3 lead total vs goal final review
+      </div>
+      <div class="milestone-item">
+        <span class="milestone-week wk-sep">Wk 13</span>
+        Q4 campaign brief drafted and approved
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI STRIP -->
+  <div class="kpi-strip animate" style="animation-delay:.36s">
+    <div class="kpi-card">
+      <span class="kpi-label">Social cadence</span>
+      <span class="kpi-value">3 → 4 → <em>5×</em></span>
+      <span class="kpi-note">Posts per week, ramping Jul through Sep</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Content output</span>
+      <span class="kpi-value"><em>8–10</em></span>
+      <span class="kpi-note">Blog posts + 1 gated lead magnet asset</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-label">Paid reviews</span>
+      <span class="kpi-value"><em>3</em></span>
+      <span class="kpi-note">Week 4 · Week 8 · Week 12 decision gates</span>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="animate" style="animation-delay:.4s">
+    <span>Q3 2026 — Agency Lead Generation</span>
+    <span>Channels: Social · Content/SEO · Paid Ads</span>
+    <span class="no-print">Generated with Claude</span>
+  </footer>
+
+</div>
+
+<script>
+  function filterChannel(ch, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    document.querySelectorAll('.grid-track').forEach(track => {
+      const tc = track.dataset.channel;
+      if (ch === 'all' || tc === ch) {
+        track.classList.remove('hidden');
+      } else {
+        track.classList.add('hidden');
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
